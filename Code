@@ -1,0 +1,148 @@
+import pandas as pd
+import numpy as np
+import seaborn as sns
+import matplotlib.pyplot as plt
+
+
+#load dataset
+df = pd.read_csv('customer_shopping_data.csv')
+df
+
+# get the number of missing data points per column
+missing_values_count = df.isnull().sum()
+missing_values_count
+
+#check datatypes
+df.dtypes
+
+#number of vistors per mall
+top_shopping_mall = df['shopping_mall'].value_counts()
+top_shopping_mall
+
+#Sales per category
+top_category = df['category'].value_counts()
+top_category
+
+#type of payment 
+countof_payment_method = df['payment_method'].value_counts()
+countof_payment_method
+
+#average age of cuustomer by gender
+avg_age_by_gender = df.groupby('gender')['age'].mean()
+avg_age_by_gender 
+
+#average spend per customer per gender
+avg_spend = df.groupby('gender')['price'].mean()
+avg_spend
+
+#max spend per gender
+max_spend = df.groupby('gender')['price'].max()
+max_spend
+
+#minimum spend per gender
+min_spend = df.groupby('gender')['price'].min()
+min_spend
+
+#sales catergory by gender
+df.groupby('category')['gender'].value_counts()
+
+#average categgory age
+df.groupby('category')['age'].mean()
+
+#average sales per categorty
+df.groupby('category')['price'].mean()
+
+#total sales oer category
+df.groupby('category')['price'].sum()
+
+#payment methods
+df.groupby('payment_method')['gender'].value_counts()
+
+#shopper per gender per mall
+df.groupby('shopping_mall')['gender'].value_counts()
+
+#avergae spend per mall
+df.groupby('shopping_mall')['price'].mean()
+
+#sum of invocies per month
+df.groupby(df['invoice_date'].dt.to_period('M'))['price'].sum()
+
+#a pie chart of the counts (in value and percentage)
+
+fig, ax = plt.subplots(figsize=(8, 8))
+total = countof_payment_method.values.sum()
+percentages = [count/total * 100 for count in countof_payment_method.values]
+ax.pie(percentages, labels=countof_payment_method.index, autopct='%1.1f%%')
+ax.set_title('Percentages of Total')
+
+plt.show()
+
+#a bar plot of the top 10 shopping malls
+fig, ax = plt.subplots(figsize=(12, 8))
+
+ax.bar(top_shopping_mall.index, top_shopping_mall.values)
+ax.set_xlabel('Shopping Mall')
+ax.set_ylabel('Frequency')
+ax.set_xticklabels(top_shopping_mall.index, rotation=90)
+ax.set_title('Top 10 Shopping Malls')
+
+plt.show()
+
+df['invoice_date'] = pd.to_datetime(df['invoice_date'])
+
+# group the data by month of invoice date and count the number of transactions
+transactions_per_month = df.groupby(df['invoice_date'].dt.to_period('M'))['invoice_no'].count()
+
+# plot the number of transactions per month as a bar graph
+fig, ax = plt.subplots(figsize=(12, 8))
+
+ax.plot(transactions_per_month.index.to_timestamp(), transactions_per_month.values)
+ax.set_xlabel('Invoice Date')
+ax.set_ylabel('Number of Transactions')
+ax.set_title('Number of Transactions per Month')
+
+plt.show()
+
+
+counts = df.groupby('payment_method')['gender'].value_counts()
+
+# reshape the data to make it easier to plot
+counts_df = counts.unstack(level=1)
+
+# plot the counts as a stacked bar chart
+fig, ax = plt.subplots(figsize=(12,8))
+
+counts_df.plot(kind='bar', ax=ax)
+ax.set_xlabel('Payment Method')
+ax.set_ylabel('Count')
+ax.set_title('Counts of Gender by Payment Method')
+
+plt.show()
+
+counts = df.groupby('shopping_mall')['gender'].value_counts()
+
+# reshape the data to make it easier to plot
+counts_df = counts.unstack(level=1)
+
+# plot the counts as a bar chart
+fig, ax = plt.subplots(figsize=(12,8))
+
+counts_df.plot(kind='bar', ax=ax)
+ax.set_xlabel('Shopping Mall')
+ax.set_ylabel('Count')
+ax.set_title('Counts of Gender by Shopping Mall')
+
+plt.show()
+
+# group the data by month and sum the price
+monthly_totals = df.groupby(df['invoice_date'].dt.to_period('M'))['price'].sum()
+
+# plot the monthly totals as a line graph
+fig, ax = plt.subplots(figsize=(12,8))
+
+monthly_totals.plot(kind='bar', ax=ax)
+ax.set_xlabel('Month')
+ax.set_ylabel('Total Price')
+ax.set_title('Total Sales by Month')
+
+plt.show()
